@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Session State Example";
+    int stepNum = Context.Session.GetInt32("CurrentStep") is int value ? value : 0;
+    string letters = Context.Session.GetString("Letters") ?? "";
+    var message = TempData["Message"] as string;
+}
+
+<div>
+    <h2>Session State Example</h2>
+    <p>Current step number: @stepNum</p>
+    <p>Letters so far: @letters</p>
+</div>
+<hr />
+<p>This button resets the session variable <strong>"num"</strong> by removing it.</p>
+<form asp-controller="TestSession" asp-action="ClearNum" method="post">
+    @Html.AntiForgeryToken()
+
+    <button type="submit" class="btn btn-warning">
+        Reset "num" Session Variable
+    </button>
+</form>
+<hr />
+<p>This button clears the session (removes all session variables)</p>
+<form asp-controller="TestSession" asp-action="ClearSession" method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">Clear Session</button>
+</form>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <hr />
+    <div class="alert alert-success" role="alert">
+        @message
+    </div>
+}
+
