@@ -1,26 +1,55 @@
 ﻿@{
     ViewData["Title"] = "Session State Example";
+    string sessionId = Context.Session.Id;
     int stepNum = Context.Session.GetInt32("CurrentStep") is int value ? value : 0;
     string letters = Context.Session.GetString("Letters") ?? "";
     var message = TempData["Message"] as string;
+    var car = ViewBag.Car as SessionState.Models.Car;
 }
 
 <div>
     <h2>Session State Example</h2>
+    <p><strong>Session ID:</strong> @sessionId</p>
     <p>Current step number: @stepNum</p>
     <p>Letters so far: @letters</p>
 </div>
 <hr />
+@if (car != null)
+{
+    <div>
+        <h4>Car Object in Session</h4>
+        <dl class="row">
+            <dt class="col-sm-2">Make</dt>
+            <dd class="col-sm-10">@car.Make</dd>
+            <dt class="col-sm-2">Model</dt>
+            <dd class="col-sm-10">@car.Model</dd>
+            <dt class="col-sm-2">Year</dt>
+            <dd class="col-sm-10">@car.Year</dd>
+            <dt class="col-sm-2">Color</dt>
+            <dd class="col-sm-10">@car.Color</dd>
+        </dl>
+        <div class="d-flex gap-2">
+            <form asp-controller="TestSession" asp-action="ResetCar" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-secondary">Reset Object</button>
+            </form>
+            <form asp-controller="TestSession" asp-action="SetCar" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-primary">Set Object</button>
+            </form>
+        </div>
+    </div>
+    <hr />
+}
 <p>This button resets the session variable <strong>"num"</strong> by removing it.</p>
 <form asp-controller="TestSession" asp-action="ClearNum" method="post">
     @Html.AntiForgeryToken()
-
     <button type="submit" class="btn btn-warning">
         Reset "num" Session Variable
     </button>
 </form>
 <hr />
-<p>This button clears the session (removes all session variables)</p>
+<p>This button clears the session data (removes all session variables)</p>
 <form asp-controller="TestSession" asp-action="ClearSession" method="post">
     @Html.AntiForgeryToken()
     <button type="submit" class="btn btn-danger">Clear Session</button>

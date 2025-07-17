@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SessionState.Models;
+using SessionState; // For SessionExtensions
 
 namespace SessionState.Controllers
 {
@@ -10,18 +12,16 @@ namespace SessionState.Controllers
             stepNum += 1;
             HttpContext.Session.SetInt32("CurrentStep", stepNum);
 
-            // Change the type of 'letters' to nullable string
             string? letters = HttpContext.Session.GetString("Letters");
 
             if (string.IsNullOrEmpty(letters))
             {
-                letters = "A"; // First visit
+                letters = "A";
             }
             else
             {
-                // Get the last character and determine the next one
-                char lastChar = letters[^1]; // ^1 = last index
-                if (lastChar < 'Z') // Limit to A–Z
+                char lastChar = letters[^1];
+                if (lastChar < 'Z')
                 {
                     char nextChar = (char)(lastChar + 1);
                     letters += nextChar;
@@ -30,25 +30,20 @@ namespace SessionState.Controllers
 
             HttpContext.Session.SetString("Letters", letters);
 
-            // Pass both values to the view (optional)
-            //ViewBag.Num = num;
-           // ViewBag.Letters = letters;
+            // Car session logic: only display what's in session, or empty if not set
+            var car = HttpContext.Session.GetObject<Car>("Car");
+            ViewBag.Car = car ?? new Car();
 
             return View();
         }
 
-        // POST: /TestSession/ClearNum
+        // POST: /TestSession/ResetCar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ClearNum()
+        public IActionResult ResetCar()
         {
-            // Remove only the "num" key from session
-            HttpContext.Session.Remove("CurrentStep");
-
-            // Optional: Use TempData to show a confirmation message
-            TempData["Message"] = "\"num\" session variable has been cleared.";
-
-            // Redirect to Index to show message or updated UI
+            HttpContext.Session.Remove("Car");
+            TempData["Message"] = "Car object has been reset.";
             return RedirectToAction("Index");
         }
 
@@ -57,10 +52,36 @@ namespace SessionState.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ClearSession()
         {
-            HttpContext.Session.Clear(); // Clear all session data
+            HttpContext.Session.Clear();
             TempData["Message"] = "Session cleared successfully.";
             return RedirectToAction("Index");
         }
 
+        // POST: /TestSession/SetCar
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SetCar()
+        {
+            var car = new Car
+            {
+                Make = "Toyota",
+                Model = "Corolla",
+                Year = 2020,
+                Color = "Blue"
+            };
+            HttpContext.Session.SetObject("Car", car);
+            TempData["Message"] = "Car object has been set.";
+            return RedirectToAction("Index");
+        }
+
+        // POST: /TestSession/ClearNum
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ClearNum()
+        {
+            HttpContext.Session.Remove("CurrentStep");
+            TempData["Message"] = "\"num\" session variable has been cleared.";
+            return RedirectToAction("Index");
+        }
     }
 }
